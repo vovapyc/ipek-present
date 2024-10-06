@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magical Wish-Granter</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', 'Courier New', cursive, sans-serif;
+      background: linear-gradient(45deg, #f0f8ff, #ffcc00, #ffb6c1, #7fffd4, #dda0dd);
+      background-size: 300% 300%;
+      animation: gradientShift 10s ease infinite;
+      transition: background 1s ease;
+      margin: 0;
+    }
+
+    #app {
+      text-align: center;
+      padding: 2em;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      z-index: 1; /* Ensure content stays above canvas */
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none; /* Ensures the canvas doesn't interfere with interaction */
+      z-index: 0; /* Canvas stays behind the content */
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #ffcc00;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.3s ease-in-out;
+      font-family: 'Impact', fantasy;
+    }
+
+    button:hover {
+      transform: scale(1.2);
+      background-color: #ff6600;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      animation: bounce 2s infinite alternate;
+      letter-spacing: 2px;
+      color: #333;
+    }
+
+    p {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      animation: fadeIn 3s ease;
+    }
+
+    img {
+      max-width: 80%;
+      height: auto;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .fade-enter-active, .fade-leave-active {
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .fade-enter, .fade-leave-to {
+      opacity: 0;
+    }
+
+    @keyframes bounce {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-20px); }
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes rotateButton {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Falling petals canvas -->
+  <canvas></canvas>
+
+  <div id="app">
+    <transition name="fade">
+      <div v-if="currentPage === 1">
+        <h1>Welcome to the World of Mystical Japanese Souvenirs</h1>
+        <p>Imagine, you're wandering through a mystical mountain in Japan... and you find a **legendary** item!</p>
+        <button @click="nextPage">Next</button>
+      </div>
+    </transition>
+    
+    <transition name="fade">
+      <div v-if="currentPage === 2">
+        <h1>Behold... The Wish-Granter!</h1>
+        <p>This talisman can grant your deepest wishes—if you play your cards right. 💫</p>
+        <img src="images/path-to-your-charm-picture.jpg" alt="Wish Granter">
+        <br>
+        <button @click="nextPage">Next</button>
+      </div>
+    </transition>
+
+    <transition name="fade">
+      <div v-if="currentPage === 3">
+        <h1>The Heroic Act at the Temple</h1>
+        <p>Look! Here’s me, attaching part of the charm to the sacred temple. It’s basically an ancient ritual now.</p>
+        <img src="images/path-to-your-attachment-picture.jpeg" alt="Attaching Charm">
+        <br>
+        <button @click="nextPage">Next</button>
+      </div>
+    </transition>
+
+    <transition name="fade">
+      <div v-if="currentPage === 4">
+        <h1>What Does It Mean?</h1>
+        <p>So, what did I actually buy? This charm (called an *omamori*) is meant to protect your **relationships** and bring good luck in connecting with others. As long as you hold onto your piece, and I’ve left mine at the temple, your wish will come true.</p>
+        <img src="images/path-to-temple-picture.jpg" alt="Temple">
+        <br>
+        <p>In Japan, these charms are **legendary**. You’re basically carrying a little piece of Mount Takao magic with you now!</p>
+        <button @click="restart">Start Over</button>
+      </div>
+    </transition>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        currentPage: 1
+      },
+      methods: {
+        nextPage() {
+          this.currentPage++;
+          if (this.currentPage > 4) {
+            this.currentPage = 1;
+          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          this.randomizeBackground();
+        },
+        restart() {
+          this.currentPage = 1;
+          this.randomizeBackground();
+        },
+        randomizeBackground() {
+          const colors = ['#f0f8ff', '#fa8072', '#ffb6c1', '#7fffd4', '#dda0dd'];
+          document.body.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        }
+      }
+    });
+
+    // Falling petals JavaScript code
+    const canvas = document.querySelector('canvas');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+
+    const TOTAL = 100;
+    const petalArray = [];
+
+    const petalImg = new Image();
+    petalImg.src = 'https://djjjk9bjm164h.cloudfront.net/petal.png'; // Image for the petal
+    petalImg.addEventListener('load', () => {
+      for (let i = 0; i < TOTAL; i++) {
+        petalArray.push(new Petal());
+      }
+      render();
+    });
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      petalArray.forEach(petal => petal.animate());
+      window.requestAnimationFrame(render);
+    }
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    let mouseX = 0;
+    function touchHandler(e) {
+      mouseX = (e.clientX || e.touches[0].clientX) / window.innerWidth;
+    }
+    window.addEventListener('mousemove', touchHandler);
+    window.addEventListener('touchmove', touchHandler);
+
+    class Petal {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = (Math.random() * canvas.height * 2) - canvas.height;
+        this.w = 25 + Math.random() * 15;
+        this.h = 20 + Math.random() * 10;
+        this.opacity = this.w / 40;
+        this.flip = Math.random();
+
+        this.xSpeed = 1.5 + Math.random() * 2;
+        this.ySpeed = 1 + Math.random() * 1;
+        this.flipSpeed = Math.random() * 0.03;
+      }
+
+      draw() {
+        if (this.y > canvas.height || this.x > canvas.width) {
+          this.x = -petalImg.width;
+          this.y = (Math.random() * canvas.height * 2) - canvas.height;
+          this.xSpeed = 1.5 + Math.random() * 2;
+          this.ySpeed = 1 + Math.random() * 1;
+          this.flip = Math.random();
+        }
+        ctx.globalAlpha = this.opacity;
+        ctx.drawImage(
+          petalImg,
+          this.x,
+          this.y,
+          this.w * (0.6 + (Math.abs(Math.cos(this.flip)) / 3)),
+          this.h * (0.8 + (Math.abs(Math.sin(this.flip)) / 5))
+        );
+      }
+
+      animate() {
+        this.x += this.xSpeed + mouseX * 5;
+        this.y += this.ySpeed + mouseX * 2;
+        this.flip += this.flipSpeed;
+        this.draw();
+      }
+    }
+  </script>
+</body>
+</html>
